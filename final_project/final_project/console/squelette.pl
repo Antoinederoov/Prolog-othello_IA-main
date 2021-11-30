@@ -335,104 +335,40 @@ getCopie([H1|T1],[H1|T2]):- \+(var(H1)),getCopie(T1,T2).
 checkIfEmpty(Index, Board) :- getDisk(Board, Index, Disk), Disk \== 'w', Disk \== 'b'.
 
 %Count Number of potential sandwich.
-countAllCoinSandwich(Board, StartIndex, Index, Player,  NbCoins, FinalCoins) :- checkIfEmpty(StartIndex, Board),
+countAllCoinSandwich(Board, Index, Player,  NbCoins, FinalCoins) :- checkIfEmpty(Index, Board),
     countCoinSandwich(Board, Index, top, Player, NbCoins, FinalCoinsTop),
     countCoinSandwich(Board, Index, down, Player, NbCoins, FinalCoinsDown),
     countCoinSandwich(Board, Index, left, Player, NbCoins, FinalCoinsLeft),
     countCoinSandwich(Board, Index, right, Player, NbCoins, FinalCoinsRight),
-FinalCoins is (FinalCoinsTop + FinalCoinsDown + FinalCoinsLeft + FinalCoinsRight).
+    countCoinSandwich(Board, Index, diagNW, Player, NbCoins, FinalCoinsNW),
+    countCoinSandwich(Board, Index, diagNE, Player, NbCoins, FinalCoinsNE),
+    countCoinSandwich(Board, Index, diagSE, Player, NbCoins, FinalCoinsSE),
+    countCoinSandwich(Board, Index, diagSW, Player, NbCoins, FinalCoinsSW),
+FinalCoins is (FinalCoinsTop + FinalCoinsDown + FinalCoinsLeft + FinalCoinsRight + FinalCoinsNW + FinalCoinsNE + FinalCoinsSE + FinalCoinsSW).
 
-countAllCoinSandwich(Board, StartIndex, Index, Player,  NbCoins, FinalCoins) :- not(checkIfEmpty(StartIndex, Board)),
+countAllCoinSandwich(Board,Index, _, _, FinalCoins) :- not(checkIfEmpty(Index, Board)),
 FinalCoins is 0.
 
-%Count Number of potential sandwich. We begin at the potential index and we go up
-countCoinSandwich(Board, Index, top, Player,  NbCoins, FinalCoins) :- IndexTampon is Index - 8,
-IndexTampon > 0,
-getDisk(Board, IndexTampon, Disk),
+%Count Number of potential sandwich.
+countCoinSandwich(Board, Index, Direction, Player,  NbCoins, FinalCoins) :- nextCell(Index, Direction, NextIndex),
+getDisk(Board, NextIndex, Disk),
 switchPlayer(Player, Opponent),
 Disk == Opponent,
 CurrentNbCoins is NbCoins+1,
-countCoinSandwich(Board, IndexTampon, top, Player, CurrentNbCoins, FinalCoins).
+countCoinSandwich(Board, NextIndex, Direction, Player, CurrentNbCoins, FinalCoins).
 
-countCoinSandwich(Board, Index, top, Player, NbCoins, FinalCoins) :- IndexTampon is Index - 8,
-IndexTampon < 0,
+%In the case there are only opponent coins and we can't continue, we can't make a sandwich
+countCoinSandwich(_, Index, Direction, _, _, FinalCoins) :- not(nextCell(Index, Direction, _)),
 FinalCoins is 0.
 
-countCoinSandwich(Board, Index, top, Player, NbCoins, FinalCoins) :- IndexTampon is Index-8,
-IndexTampon > 0,
-getDisk(Board, IndexTampon, Disk),
-Disk == Player,
-FinalCoins is NbCoins.
-
-%Count Number of potential sandwich. We begin at the potential index and we go down
-countCoinSandwich(Board, Index, down, Player,  NbCoins, FinalCoins) :- IndexTampon is Index + 8,
-IndexTampon < 64,
-getDisk(Board, IndexTampon, Disk),
+%In the case we find an empty case, it's not a sandwich
+countCoinSandwich(Board, Index, Direction, _, _, FinalCoins) :- nextCell(Index, Direction, NextIndex),
 switchPlayer(Player, Opponent),
-Disk == Opponent,
-CurrentNbCoins is NbCoins+1,
-countCoinSandwich(Board, IndexTampon, down, Player, CurrentNbCoins, FinalCoins).
-
-countCoinSandwich(Board, Index, down, Player, NbCoins, FinalCoins) :- IndexTampon is Index+8,
-IndexTampon > 64,
+getDisk(Board, NextIndex, Disk), Disk \== Player, Disk \== Opponent,
 FinalCoins is 0.
 
-countCoinSandwich(Board, Index, down, Player, NbCoins, FinalCoins) :- IndexTampon is Index+8,
-IndexTampon > 0,
-getDisk(Board, IndexTampon, Disk),
-Disk == Player,
-FinalCoins is NbCoins.
-
-%Count Number of potential sandwich. We begin at the potential index and we go left
-countCoinSandwich(Board, Index, left, Player,  NbCoins, FinalCoins) :- IndexTampon is Index - 1,
-Mod is IndexTampon mod 8, Mod \== 0,
-getDisk(Board, IndexTampon, Disk),
-switchPlayer(Player, Opponent),
-Disk == Opponent,
-CurrentNbCoins is NbCoins+1,
-countCoinSandwich(Board, IndexTampon, left, Player, CurrentNbCoins, FinalCoins).
-
-countCoinSandwich(Board, Index, left, Player, NbCoins, FinalCoins) :- IndexTampon is Index - 1,
-Mod is IndexTampon mod 8, Mod == 0,
-getDisk(Board, IndexTampon, Disk),
-Disk \== Player,
-FinalCoins is 0.
-
-countCoinSandwich(Board, Index, left, Player, NbCoins, FinalCoins) :- IndexTampon is Index - 1,
-Mod is IndexTampon mod 8, Mod == 0,
-getDisk(Board, IndexTampon, Disk),
-Disk == Player,
-FinalCoins is NbCoins.
-
-countCoinSandwich(Board, Index, left, Player, NbCoins, FinalCoins) :- IndexTampon is Index - 1,
-Mod is IndexTampon mod 8, Mod \== 0,
-getDisk(Board, IndexTampon, Disk),
-Disk == Player,
-FinalCoins is NbCoins.
-
-%Count Number of potential sandwich. We begin at the potential index and we go right
-countCoinSandwich(Board, Index, right, Player,  NbCoins, FinalCoins) :- IndexTampon is Index + 1,
-Mod is IndexTampon mod 8, Mod \== 7,
-getDisk(Board, IndexTampon, Disk),
-switchPlayer(Player, Opponent),
-Disk == Opponent,
-CurrentNbCoins is NbCoins+1,
-countCoinSandwich(Board, IndexTampon, right, Player, CurrentNbCoins, FinalCoins).
-
-countCoinSandwich(Board, Index, right, Player, NbCoins, FinalCoins) :- IndexTampon is Index + 1,
-Mod is IndexTampon mod 8, Mod == 7,
-getDisk(Board, IndexTampon, Disk),
-Disk \== Player,
-FinalCoins is 0.
-
-countCoinSandwich(Board, Index, right, Player, NbCoins, FinalCoins) :- IndexTampon is Index + 1,
-Mod is IndexTampon mod 8, Mod == 7,
-getDisk(Board, IndexTampon, Disk),
-Disk == Player,
-FinalCoins is NbCoins.
-
-countCoinSandwich(Board, Index, right, Player, NbCoins, FinalCoins) :- IndexTampon is Index + 1,
-Mod is IndexTampon mod 8, Mod \== 7,
-getDisk(Board, IndexTampon, Disk),
+%In the case we find one of the player coin, we have made a sandwich (with no one inside if it is an adjacent point)
+countCoinSandwich(Board, Index, Direction, Player, NbCoins, FinalCoins) :- nextCell(Index, Direction, NextIndex),
+getDisk(Board, NextIndex, Disk),
 Disk == Player,
 FinalCoins is NbCoins.
