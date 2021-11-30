@@ -1,47 +1,47 @@
 %%%%%%%%%%%%%%%%%%%
-% OTHELLO PROLOG  %
-%%%%%%%%%%%%%%%%%%%
-% BRANCHEREAU C.  %
-% CACHARD SYLVAIN %
-% GRAVEY THIBAUT  %
-% DE ANDRIA Q.    %
-% ROB LOUIS       %
-% MIGNOT THOMAS   %
-% OECHSLIN K.     %
-%%%%%%%%%%%%%%%%%%%
+	% OTHELLO PROLOG  %
+	%%%%%%%%%%%%%%%%%%%
+	% BRANCHEREAU C.  %
+	% CACHARD SYLVAIN %
+	% GRAVEY THIBAUT  %
+	% DE ANDRIA Q.    %
+	% ROB LOUIS       %
+	% MIGNOT THOMAS   %
+	% OECHSLIN K.     %
+	%%%%%%%%%%%%%%%%%%%
 
-%Rules : https://www.ultraboardgames.com/othello/game-rules.php
-%Heuristics : https://courses.cs.washington.edu/courses/cse573/04au/Project/mini1/RUSSIA/Final_Paper.pdf
+	%Rules : https://www.ultraboardgames.com/othello/game-rules.php
+	%Heuristics : https://courses.cs.washington.edu/courses/cse573/04au/Project/mini1/RUSSIA/Final_Paper.pdf
 
-%Objective : The goal is to get the majority of colour disks on the board at the end of the game.
+	%Objective : The goal is to get the majority of colour disks on the board at the end of the game.
 
-%Creation of the boarding game at the begin of the play
-%%The board will start with 2 black discs and 2 white discs at the centre of the board.
-%%They are arranged with black forming a North-East to South-West direction.
-%%White is forming a North-West to South-East direction.
-%%Black always moves first.
-:- writeln('Bienvenue sur Prolog_Othello-IA !').
-:- dynamic(board/1).
-:- dynamic(playerini/2).
-:- dynamic(heuristicPlayer/2).
-:- dynamic(depthPlayer/2).
-:- dynamic(playerType/2).
-:- retractall(board(_)).
-:- retractall(playerini(_, _)).
-:- retractall(heuristicPlayer(_, _)).
-:- retractall(depthPlayer(_, _)).
-:- retractall(playerType(_, _)).
-:- writeln('Chargement de alpha beta : ').
-:- [alpha_beta].
-:- writeln('Chargement des Heuristics : ').
-:- [heuristic_disk_diff].
-:- [heuristic_coin_parity].
-:- [heuristic_actual_mobility].
-:- [heuristic_potential_mobility].
-:- [heuristic_stability].
-:- [heuristic_cornersCaptured].
+	%Creation of the boarding game at the begin of the play
+	%%The board will start with 2 black discs and 2 white discs at the centre of the board.
+	%%They are arranged with black forming a North-East to South-West direction.
+	%%White is forming a North-West to South-East direction.
+	%%Black always moves first.
+	:- writeln('Bienvenue sur Prolog_Othello-IA !').
+	:- dynamic(board/1).
+	:- dynamic(playerini/2).
+	:- dynamic(heuristicPlayer/2).
+	:- dynamic(depthPlayer/2).
+	:- dynamic(playerType/2).
+	:- retractall(board(_)).
+	:- retractall(playerini(_, _)).
+	:- retractall(heuristicPlayer(_, _)).
+	:- retractall(depthPlayer(_, _)).
+	:- retractall(playerType(_, _)).
+	:- writeln('Chargement de alpha beta : ').
+	:- [alpha_beta].
+	:- writeln('Chargement des Heuristics : ').
+	:- [heuristic_disk_diff].
+	:- [heuristic_coin_parity].
+	:- [heuristic_actual_mobility].
+	:- [heuristic_potential_mobility].
+	:- [heuristic_stability].
+	:- [heuristic_cornersCaptured].
 
-init :- 
+	init :-
 	retractall(board(_)),
 	retractall(playerini(_, _)),
 	retractall(heuristicPlayer(_, _)),
@@ -66,26 +66,26 @@ init :-
 	assertz(playerType(b, PB)),
 	(
 		PB == 2 ->
-		(
-			repeat,
-			writeln(' ----- '),
-			writeln('Choisissez l\'heuristique pour le joueur noir (b)'),
-			chooseHeuristic(b, HB),
 			(
-				HB > 1 ->
+				repeat,
+				writeln(' ----- '),
+				writeln('Choisissez l\'heuristique pour le joueur noir (b)'),
+				chooseHeuristic(b, HB),
 				(
-					repeat,
-					writeln('Choisissez la profondeur pour le joueur noir (b)'),
-					read(DB),
-					DB>0,
-					assertz(depthPlayer(b, DB))
-				) ;
-				true
-			)
-		) ;
-		true
+					HB > 1 ->
+						(
+							repeat,
+							writeln('Choisissez la profondeur pour le joueur noir (b)'),
+							read(DB),
+							DB>0,
+							assertz(depthPlayer(b, DB))
+						) ;
+true
+	)
+	) ;
+true
 	),
-	repeat,
+repeat,
 	writeln(' ----- '),
 	writeln('Le joueur blanc (w) est : '),
 	writeln('1) Humain'),
@@ -97,30 +97,30 @@ init :-
 	assertz(playerType(w, PW)),
 	(
 		PW == 2 ->
-		(
-			repeat,
-			writeln(' ----- '),
-			writeln('Choisissez l\'heuristique pour le joueur blanc (w)'),
-			chooseHeuristic(w, HW),
 			(
-				HW > 1 ->
+				repeat,
+				writeln(' ----- '),
+				writeln('Choisissez l\'heuristique pour le joueur blanc (w)'),
+				chooseHeuristic(w, HW),
 				(
-					repeat,
-					writeln('Choisissez la profondeur pour le joueur blanc (w)'),
-					read(DW),
-					DW>0,
-					assertz(depthPlayer(w, DW))
-				) ;
-				true
-			)
-		) ;
-		true
+					HW > 1 ->
+						(
+							repeat,
+							writeln('Choisissez la profondeur pour le joueur blanc (w)'),
+							read(DW),
+							DW>0,
+							assertz(depthPlayer(w, DW))
+						) ;
+true
+	)
+	) ;
+true
 	),
-	displayBoard,
+displayBoard,
 	play('b').
 
-%Choose the heuristic for the given player
-chooseHeuristic(Player, H) :- 
+		%Choose the heuristic for the given player
+	chooseHeuristic(Player, H) :-
 	writeln(' 1) Heuristique "random"'),
 	writeln(' 2) Heuristique "disk difference"'),
 	writeln(' 3) Heuristique "stability"'),
@@ -134,12 +134,12 @@ chooseHeuristic(Player, H) :-
 	H<8,
 	assertz(heuristicPlayer(Player, H)).
 
-%Playing turn
-%%if there is no winner, we made a normal turn for the next player
-%%If you cant outflank and flip at least one opposing disc, you must pass 
-%%your turn. However, if a move is available to you, you cant forfeit your turn.
-%%if a player cannot make a valide move, he pass his turn and the opponent continues
-play(_) :- gameover(Winner), !, format('Game is over, the winner is ~w ~n',[Winner]), displayBoard.
+		%Playing turn
+	%%if there is no winner, we made a normal turn for the next player
+%%If you cant outflank and flip at least one opposing disc, you must pass
+	%%your turn. However, if a move is available to you, you cant forfeit your turn.
+	%%if a player cannot make a valide move, he pass his turn and the opponent continues
+	play(_) :- gameover(Winner), !, format('Game is over, the winner is ~w ~n',[Winner]), displayBoard.
 play(Player) :- board(Board), canMakeAMove(Board,Player), format('New turn for : ~w ~n',[Player]), displayBoard, playerType(Player, Type),
 				(Type == 2 -> ia(Board,Player,Move) ; human(Board,Player,Move)), playMove(Board,Move,Player,NewBoard), applyIt(Board,NewBoard), switchPlayer(Player,NextPlayer), play(NextPlayer).
 play(Player) :- format('Player "~w" can not play.~n',[Player]), switchPlayer(Player,NextPlayer), play(NextPlayer).
@@ -375,7 +375,9 @@ FinalCoins is (FinalCoinsTop + FinalCoinsDown + FinalCoinsLeft + FinalCoinsRight
 countAllCoinSandwich(Board,Index, _, _, FinalCoins) :- not(checkIfEmpty(Index, Board)),
 FinalCoins is 0.
 
-countMaxCoinSandwich(Board, Index, IndexMax, IndexMaxFinal, Player, CurrentCoinsMax, FinalCoinsMax) :- Index < 64,
+% Count the maximum of coins that can be flipped in one move
+% Returns the index of the position and the number of coins flipped
+countMaxCoinSandwich(Board, Index, _, IndexMaxFinal, Player, CurrentCoinsMax, FinalCoinsMax) :- Index < 64,
 countAllCoinSandwich(Board, Index, Player,  0, FinalCoins),
 CurrentCoinsMax < FinalCoins,
 CurrentCoinsLocalMax is FinalCoins,
@@ -392,3 +394,23 @@ countMaxCoinSandwich(Board, IndexActuelle, IndexMax, IndexMaxFinal, Player, Curr
 countMaxCoinSandwich(_, Index, IndexMax, IndexMaxFinal, _, CurrentCoinsMax, FinalCoinsMax) :- Index >= 64,
 FinalCoinsMax is CurrentCoinsMax,
 IndexMaxFinal is IndexMax.
+
+% finds if they are different indexes with the same number of coins that can be flipped
+
+countOccurencesMax(Board, Index, Player, ListIndex, ListIndexFinal, FinalCoinsMax) :- Index >= 64, print(ListIndex).
+countOccurencesMax(Board, Index, Player, ListIndex, ListIndexFinal, FinalCoinsMax) :-Index < 64,
+countAllCoinSandwich(Board, Index, Player,  0, FinalCoins),
+FinalCoinsMax = FinalCoins,
+add(Index, ListIndex, ListIndexActuelle),
+IndexActuelle is Index + 1,
+countOccurencesMax(Board, IndexActuelle, Player, ListIndexActuelle, ListIndexFinal, FinalCoinsMax).
+
+countOccurencesMax(Board, Index, Player, ListIndex, ListIndexFinal, FinalCoinsMax) :- Index < 64,
+countAllCoinSandwich(Board, Index, Player,  0, FinalCoins),
+FinalCoinsMax \= FinalCoins,
+IndexActuelle is Index + 1,
+countOccurencesMax(Board, IndexActuelle, Player, ListIndex, ListIndexFinal, FinalCoinsMax).
+
+
+add(X,[],[X]).
+add(X,[Y|Tail],[Y|Tail1]):- add(X,Tail,Tail1).
