@@ -375,18 +375,20 @@ FinalCoins is (FinalCoinsTop + FinalCoinsDown + FinalCoinsLeft + FinalCoinsRight
 countAllCoinSandwich(Board,Index, _, _, FinalCoins) :- not(checkIfEmpty(Index, Board)),
 FinalCoins is 0.
 
-countMaxCoinSandwich(Board, Index, Player, CurrentCoinsMax, FinalCoinsMax) :- Index < 64,
+countMaxCoinSandwich(Board, Index, IndexMax, IndexMaxFinal, Player, CurrentCoinsMax, FinalCoinsMax) :- Index < 64,
 countAllCoinSandwich(Board, Index, Player,  0, FinalCoins),
 CurrentCoinsMax < FinalCoins,
 CurrentCoinsLocalMax is FinalCoins,
+IndexMaxActuelle is Index,
 IndexActuelle is Index + 1,
-countMaxCoinSandwich(Board, IndexActuelle, Player, CurrentCoinsLocalMax, FinalCoinsMax).
+countMaxCoinSandwich(Board, IndexActuelle, IndexMaxActuelle, IndexMaxFinal, Player, CurrentCoinsLocalMax, FinalCoinsMax).
 
-countMaxCoinSandwich(Board, Index, Player, CurrentCoinsMax, FinalCoinsMax) :- Index < 64,
+countMaxCoinSandwich(Board, Index, IndexMax, IndexMaxFinal, Player, CurrentCoinsMax, FinalCoinsMax) :- Index < 64,
 countAllCoinSandwich(Board, Index, Player,  0, FinalCoins),
 CurrentCoinsMax >= FinalCoins,
 IndexActuelle is Index + 1,
-countMaxCoinSandwich(Board, IndexActuelle, Player, CurrentCoinsMax, FinalCoinsMax).
+countMaxCoinSandwich(Board, IndexActuelle, IndexMax, IndexMaxFinal, Player, CurrentCoinsMax, FinalCoinsMax).
 
-countMaxCoinSandwich(_, Index, _, CurrentCoinsMax, FinalCoinsMax) :- Index >= 64,
- FinalCoinsMax is CurrentCoinsMax.
+countMaxCoinSandwich(_, Index, IndexMax, IndexMaxFinal, _, CurrentCoinsMax, FinalCoinsMax) :- Index >= 64,
+FinalCoinsMax is CurrentCoinsMax,
+IndexMaxFinal is IndexMax.
