@@ -335,27 +335,28 @@ getCopie([H1|T1],[H1|T2]):- \+(var(H1)),getCopie(T1,T2).
 checkIfEmpty(Index, Board) :- getDisk(Board, Index, Disk), Disk \== 'w', Disk \== 'b'.
 
 %Count Number of potential sandwich.
-countAllCoinSandwich(Board, StartIndex, Index, Player,  NbCoins, FinalCoins) :- checkIfEmpty(StartIndex, Board),
+countAllCoinSandwich(Board, Index, Player,  NbCoins, FinalCoins) :- checkIfEmpty(Index, Board),
     countCoinSandwich(Board, Index, top, Player, NbCoins, FinalCoinsTop),
     countCoinSandwich(Board, Index, down, Player, NbCoins, FinalCoinsDown),
     countCoinSandwich(Board, Index, left, Player, NbCoins, FinalCoinsLeft),
     countCoinSandwich(Board, Index, right, Player, NbCoins, FinalCoinsRight),
 FinalCoins is (FinalCoinsTop + FinalCoinsDown + FinalCoinsLeft + FinalCoinsRight).
 
-countAllCoinSandwich(Board, StartIndex, Index, Player,  NbCoins, FinalCoins) :- not(checkIfEmpty(StartIndex, Board)),
+countAllCoinSandwich(Board,Index, _, _, FinalCoins) :- not(checkIfEmpty(Index, Board)),
 FinalCoins is 0.
 
 %Count Number of potential sandwich. We begin at the potential index and we go up
-countCoinSandwich(Board, Index, top, Player,  NbCoins, FinalCoins) :- IndexTampon is Index - 8,
-IndexTampon > 0,
-getDisk(Board, IndexTampon, Disk),
+countCoinSandwich(Board, Index, top, Player,  NbCoins, FinalCoins) :- IndexTop is Index - 8,
+IndexTop > 0,
+getDisk(Board, IndexTop, Disk),
 switchPlayer(Player, Opponent),
 Disk == Opponent,
 CurrentNbCoins is NbCoins+1,
-countCoinSandwich(Board, IndexTampon, top, Player, CurrentNbCoins, FinalCoins).
+countCoinSandwich(Board, IndexTop, top, Player, CurrentNbCoins, FinalCoins).
 
-countCoinSandwich(Board, Index, top, Player, NbCoins, FinalCoins) :- IndexTampon is Index - 8,
-IndexTampon < 0,
+countCoinSandwich(Board, Index, top, Player, _, FinalCoins) :- IndexTop is Index - 8,
+switchPlayer(Player, Opponent),
+(IndexTop < 0 ;  getDisk(Board, IndexTop, Disk), Disk \== Player, Disk \== Opponent),
 FinalCoins is 0.
 
 countCoinSandwich(Board, Index, top, Player, NbCoins, FinalCoins) :- IndexTampon is Index-8,
@@ -365,74 +366,61 @@ Disk == Player,
 FinalCoins is NbCoins.
 
 %Count Number of potential sandwich. We begin at the potential index and we go down
-countCoinSandwich(Board, Index, down, Player,  NbCoins, FinalCoins) :- IndexTampon is Index + 8,
-IndexTampon < 64,
-getDisk(Board, IndexTampon, Disk),
+countCoinSandwich(Board, Index, down, Player,  NbCoins, FinalCoins) :- IndexDown is Index + 8,
+IndexDown < 64,
+getDisk(Board, IndexDown, Disk),
 switchPlayer(Player, Opponent),
 Disk == Opponent,
 CurrentNbCoins is NbCoins+1,
-countCoinSandwich(Board, IndexTampon, down, Player, CurrentNbCoins, FinalCoins).
+countCoinSandwich(Board, IndexDown, down, Player, CurrentNbCoins, FinalCoins).
 
-countCoinSandwich(Board, Index, down, Player, NbCoins, FinalCoins) :- IndexTampon is Index+8,
-IndexTampon > 64,
+countCoinSandwich(Board, Index, down, Player, _, FinalCoins) :- IndexDown is Index+8,
+switchPlayer(Player, Opponent),
+(IndexDown > 64 ; getDisk(Board, IndexDown, Disk), Disk \== Player, Disk \== Opponent),
 FinalCoins is 0.
 
-countCoinSandwich(Board, Index, down, Player, NbCoins, FinalCoins) :- IndexTampon is Index+8,
-IndexTampon > 0,
-getDisk(Board, IndexTampon, Disk),
+countCoinSandwich(Board, Index, down, Player, NbCoins, FinalCoins) :- IndexDown is Index+8,
+IndexDown < 64,
+getDisk(Board, IndexDown, Disk),
 Disk == Player,
 FinalCoins is NbCoins.
 
 %Count Number of potential sandwich. We begin at the potential index and we go left
-countCoinSandwich(Board, Index, left, Player,  NbCoins, FinalCoins) :- IndexTampon is Index - 1,
-Mod is IndexTampon mod 8, Mod \== 0,
-getDisk(Board, IndexTampon, Disk),
+countCoinSandwich(Board, Index, left, Player,  NbCoins, FinalCoins) :- IndexLeft is Index - 1,
+Mod is IndexLeft mod 8, Mod \== 7,
+getDisk(Board, IndexLeft, Disk),
 switchPlayer(Player, Opponent),
 Disk == Opponent,
 CurrentNbCoins is NbCoins+1,
-countCoinSandwich(Board, IndexTampon, left, Player, CurrentNbCoins, FinalCoins).
+countCoinSandwich(Board, IndexLeft, left, Player, CurrentNbCoins, FinalCoins).
 
-countCoinSandwich(Board, Index, left, Player, NbCoins, FinalCoins) :- IndexTampon is Index - 1,
-Mod is IndexTampon mod 8, Mod == 0,
-getDisk(Board, IndexTampon, Disk),
-Disk \== Player,
+countCoinSandwich(Board, Index, left, Player, _, FinalCoins) :- IndexLeft is Index - 1,
+Mod is IndexLeft mod 8, switchPlayer(Player, Opponent),
+(Mod == 7 ; getDisk(Board, IndexLeft, Disk), Disk \== Player, Disk \== Opponent),
 FinalCoins is 0.
 
-countCoinSandwich(Board, Index, left, Player, NbCoins, FinalCoins) :- IndexTampon is Index - 1,
-Mod is IndexTampon mod 8, Mod == 0,
-getDisk(Board, IndexTampon, Disk),
-Disk == Player,
-FinalCoins is NbCoins.
-
-countCoinSandwich(Board, Index, left, Player, NbCoins, FinalCoins) :- IndexTampon is Index - 1,
-Mod is IndexTampon mod 8, Mod \== 0,
-getDisk(Board, IndexTampon, Disk),
+countCoinSandwich(Board, Index, left, Player, NbCoins, FinalCoins) :- IndexLeft is Index - 1,
+Mod is IndexLeft mod 8, Mod \== 7,
+getDisk(Board, IndexLeft, Disk),
 Disk == Player,
 FinalCoins is NbCoins.
 
 %Count Number of potential sandwich. We begin at the potential index and we go right
-countCoinSandwich(Board, Index, right, Player,  NbCoins, FinalCoins) :- IndexTampon is Index + 1,
-Mod is IndexTampon mod 8, Mod \== 7,
-getDisk(Board, IndexTampon, Disk),
+countCoinSandwich(Board, Index, right, Player,  NbCoins, FinalCoins) :- IndexRight is Index + 1,
+Mod is IndexRight mod 8, Mod \== 0,
+getDisk(Board, IndexRight, Disk),
 switchPlayer(Player, Opponent),
 Disk == Opponent,
 CurrentNbCoins is NbCoins+1,
-countCoinSandwich(Board, IndexTampon, right, Player, CurrentNbCoins, FinalCoins).
+countCoinSandwich(Board, IndexRight, right, Player, CurrentNbCoins, FinalCoins).
 
-countCoinSandwich(Board, Index, right, Player, NbCoins, FinalCoins) :- IndexTampon is Index + 1,
-Mod is IndexTampon mod 8, Mod == 7,
-getDisk(Board, IndexTampon, Disk),
-Disk \== Player,
+countCoinSandwich(Board, Index, right, Player, _, FinalCoins) :- IndexRight is Index + 1,
+Mod is IndexRight mod 8, switchPlayer(Player, Opponent),
+(Mod == 0 ; getDisk(Board, IndexRight, Disk), Disk \== Player, Disk \== Opponent),
 FinalCoins is 0.
 
-countCoinSandwich(Board, Index, right, Player, NbCoins, FinalCoins) :- IndexTampon is Index + 1,
-Mod is IndexTampon mod 8, Mod == 7,
-getDisk(Board, IndexTampon, Disk),
-Disk == Player,
-FinalCoins is NbCoins.
-
-countCoinSandwich(Board, Index, right, Player, NbCoins, FinalCoins) :- IndexTampon is Index + 1,
-Mod is IndexTampon mod 8, Mod \== 7,
-getDisk(Board, IndexTampon, Disk),
+countCoinSandwich(Board, Index, right, Player, NbCoins, FinalCoins) :- IndexRight is Index + 1,
+Mod is IndexRight mod 8, Mod \== 0,
+getDisk(Board, IndexRight, Disk),
 Disk == Player,
 FinalCoins is NbCoins.
