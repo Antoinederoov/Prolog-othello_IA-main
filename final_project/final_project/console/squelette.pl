@@ -331,24 +331,8 @@ getCopie([],[]).
 getCopie([H|T],[H1|T1]):-var(H),var(H1),H1\==H,getCopie(T,T1).
 getCopie([H1|T1],[H1|T2]):- \+(var(H1)),getCopie(T1,T2).
 
-% Check if there is not a coin on this index of the board
-checkIfEmpty(Index, Board) :- getDisk(Board, Index, Disk), Disk \== 'w', Disk \== 'b'.
 
-%Count Number of potential sandwich.
-countAllCoinSandwich(Board, Index, Player,  NbCoins, FinalCoins) :- checkIfEmpty(Index, Board),
-    countCoinSandwich(Board, Index, top, Player, NbCoins, FinalCoinsTop),
-    countCoinSandwich(Board, Index, down, Player, NbCoins, FinalCoinsDown),
-    countCoinSandwich(Board, Index, left, Player, NbCoins, FinalCoinsLeft),
-    countCoinSandwich(Board, Index, right, Player, NbCoins, FinalCoinsRight),
-    countCoinSandwich(Board, Index, diagNW, Player, NbCoins, FinalCoinsNW),
-    countCoinSandwich(Board, Index, diagNE, Player, NbCoins, FinalCoinsNE),
-    countCoinSandwich(Board, Index, diagSE, Player, NbCoins, FinalCoinsSE),
-    countCoinSandwich(Board, Index, diagSW, Player, NbCoins, FinalCoinsSW),
-FinalCoins is (FinalCoinsTop + FinalCoinsDown + FinalCoinsLeft + FinalCoinsRight + FinalCoinsNW + FinalCoinsNE + FinalCoinsSE + FinalCoinsSW).
-
-countAllCoinSandwich(Board,Index, _, _, FinalCoins) :- not(checkIfEmpty(Index, Board)),
-FinalCoins is 0.
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Count Number of potential sandwich.
 countCoinSandwich(Board, Index, Direction, Player,  NbCoins, FinalCoins) :- nextCell(Index, Direction, NextIndex),
 getDisk(Board, NextIndex, Disk),
@@ -372,3 +356,37 @@ countCoinSandwich(Board, Index, Direction, Player, NbCoins, FinalCoins) :- nextC
 getDisk(Board, NextIndex, Disk),
 Disk == Player,
 FinalCoins is NbCoins.
+
+% Check if there is not a coin on this index of the board
+checkIfEmpty(Index, Board) :- getDisk(Board, Index, Disk), Disk \== 'w', Disk \== 'b'.
+
+%Count Number of potential sandwich.
+countAllCoinSandwich(Board, Index, Player,  NbCoins, FinalCoins) :- checkIfEmpty(Index, Board),
+    countCoinSandwich(Board, Index, top, Player, NbCoins, FinalCoinsTop),
+    countCoinSandwich(Board, Index, down, Player, NbCoins, FinalCoinsDown),
+    countCoinSandwich(Board, Index, left, Player, NbCoins, FinalCoinsLeft),
+    countCoinSandwich(Board, Index, right, Player, NbCoins, FinalCoinsRight),
+    countCoinSandwich(Board, Index, diagNW, Player, NbCoins, FinalCoinsNW),
+    countCoinSandwich(Board, Index, diagNE, Player, NbCoins, FinalCoinsNE),
+    countCoinSandwich(Board, Index, diagSE, Player, NbCoins, FinalCoinsSE),
+    countCoinSandwich(Board, Index, diagSW, Player, NbCoins, FinalCoinsSW),
+FinalCoins is (FinalCoinsTop + FinalCoinsDown + FinalCoinsLeft + FinalCoinsRight + FinalCoinsNW + FinalCoinsNE + FinalCoinsSE + FinalCoinsSW).
+
+countAllCoinSandwich(Board,Index, _, _, FinalCoins) :- not(checkIfEmpty(Index, Board)),
+FinalCoins is 0.
+
+countMaxCoinSandwich(Board, Index, Player, CurrentCoinsMax, FinalCoinsMax) :- Index < 64,
+countAllCoinSandwich(Board, Index, Player,  0, FinalCoins),
+CurrentCoinsMax < FinalCoins,
+CurrentCoinsLocalMax is FinalCoins,
+IndexActuelle is Index + 1,
+countMaxCoinSandwich(Board, IndexActuelle, Player, CurrentCoinsLocalMax, FinalCoinsMax).
+
+countMaxCoinSandwich(Board, Index, Player, CurrentCoinsMax, FinalCoinsMax) :- Index < 64,
+countAllCoinSandwich(Board, Index, Player,  0, FinalCoins),
+CurrentCoinsMax >= FinalCoins,
+IndexActuelle is Index + 1,
+countMaxCoinSandwich(Board, IndexActuelle, Player, CurrentCoinsMax, FinalCoinsMax).
+
+countMaxCoinSandwich(_, Index, _, CurrentCoinsMax, FinalCoinsMax) :- Index >= 64,
+ FinalCoinsMax is CurrentCoinsMax.
