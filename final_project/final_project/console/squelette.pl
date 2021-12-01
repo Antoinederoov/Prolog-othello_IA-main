@@ -1,14 +1,4 @@
-%%%%%%%%%%%%%%%%%%%
-	% OTHELLO PROLOG  %
-	%%%%%%%%%%%%%%%%%%%
-	% BRANCHEREAU C.  %
-	% CACHARD SYLVAIN %
-	% GRAVEY THIBAUT  %
-	% DE ANDRIA Q.    %
-	% ROB LOUIS       %
-	% MIGNOT THOMAS   %
-	% OECHSLIN K.     %
-	%%%%%%%%%%%%%%%%%%%
+
 
 	%Rules : https://www.ultraboardgames.com/othello/game-rules.php
 	%Heuristics : https://courses.cs.washington.edu/courses/cse573/04au/Project/mini1/RUSSIA/Final_Paper.pdf
@@ -40,6 +30,7 @@
 	:- [heuristic_potential_mobility].
 	:- [heuristic_stability].
 	:- [heuristic_cornersCaptured].
+	:- [heuristic_maximization].
 
 	init :-
 	retractall(board(_)),
@@ -128,10 +119,11 @@ displayBoard,
 	writeln(' 5) Heuristique "coin parity"'),
 	writeln(' 6) Heuristique "corners captured"'),
 	writeln(' 7) Heuristique "potential mobility"'),
+	writeln(' 8) Heuristique "Maximisation"'),
 	writeln(' ----- '),
 	read(H),
 	H>0,
-	H<8,
+	H<9,
 	assertz(heuristicPlayer(Player, H)).
 
 		%Playing turn
@@ -153,7 +145,7 @@ canMakeAMove(Board,Player) :- setof(X, isValid(Board,Player,X), List), member(_,
 allValidMoves(Board, Player, List) :- setof(X, isValid(Board,Player,X), List).
 
 %Check if a move is valid
-isValid(Board,Player,Index) :- 
+isValid(Board,Player,Index) :-
 	emptyCell(Board,Index),
 	(isSandwich(Board,Player,Index,top);
 	isSandwich(Board,Player,Index,down);
@@ -162,7 +154,7 @@ isValid(Board,Player,Index) :-
 	isSandwich(Board,Player,Index,diagNW);
 	isSandwich(Board,Player,Index,diagNE);
 	isSandwich(Board,Player,Index,diagSE);
-	isSandwich(Board,Player,Index,diagSW)). 
+	isSandwich(Board,Player,Index,diagSW)).
 
 %Check if a cell is empty
 emptyCell(Board,Index) :- nth0(Index,Board,X), var(X).
@@ -176,7 +168,7 @@ check_sandwich(Player, FinalList).
 
 %List all the disk in a precise direction from the index to the last cell of the direction
 listDiskInDirection(_,Index,Direction,List,FinalList) :- \+ nextCell(Index,Direction,_), !, FinalList = List.
-listDiskInDirection(Board,Index,Direction,List,FinalList) :- nextCell(Index,Direction,NextCellIndex), getDisk(Board, NextCellIndex, Disk), append(List,[Disk],NewList), listDiskInDirection(Board,NextCellIndex,Direction,NewList,FinalList). 
+listDiskInDirection(Board,Index,Direction,List,FinalList) :- nextCell(Index,Direction,NextCellIndex), getDisk(Board, NextCellIndex, Disk), append(List,[Disk],NewList), listDiskInDirection(Board,NextCellIndex,Direction,NewList,FinalList).
 
 %Get the next cell depends on the direction, false if there is no more
 nextCell(CellIndex, top, NextCellIndex) :- NextCellIndex is CellIndex-8, NextCellIndex > -1.
@@ -201,7 +193,7 @@ check_sandwich(Player, [H|T]) :- H \== Player, check_sandwich(Player,T).
 playMove(Board, Move, Player, NewBoard) :- nth0(Move,Board,Player), flipAll(Board,Move,Player,List),majBoard(Board,Player,List,NewBoard),!.
 
 %Get the list of all flipped disk
-flipAll(Board,Move,Player,List) :- 
+flipAll(Board,Move,Player,List) :-
 	flip(Board,Move,Player,top,L1),
 	flip(Board,Move,Player,down,L2),
 	flip(Board,Move,Player,left,L3),
@@ -213,8 +205,8 @@ flipAll(Board,Move,Player,List) :-
 	append([L1,L2,L3,L4,L5,L6,L7,L8],List),!.
 
 %Try to Flip in a precise direction, give the flipped disk index (FinalList)
-flip(Board,Move,Player,Direction,FinalList) :- 
-	switchPlayer(Player,Opponent), 
+flip(Board,Move,Player,Direction,FinalList) :-
+	switchPlayer(Player,Opponent),
 	listDiskInDirection(Board,Move,Direction,[],CompleteDiskList),
 	((\+(member(_,CompleteDiskList)) ; [H|_] = CompleteDiskList, \+(H==Opponent)) -> FinalList = [] ;
 	[_|DiskList] = CompleteDiskList,
@@ -252,9 +244,9 @@ ia(Board, Player, Move) :-
 		H == 1 ->
 		(
 			%Random IA
-			allValidMoves(Board, Player, List), 
-			length(List, Length), 
-			random(0, Length, Index), 
+			allValidMoves(Board, Player, List),
+			length(List, Length),
+			random(0, Length, Index),
 			nth0(Index, List, Move)
 		);
 		(
@@ -281,7 +273,7 @@ human(Board,Player,Move) :-
 	format('Vous avez joue le coup ~w ~n', [Move]).
 
 %Save the new board and remove the old one from the knowledge base
-applyIt(Board,NewBoard) :- 
+applyIt(Board,NewBoard) :-
 	retract(board(Board)),
 	assertz(board(NewBoard)).
 
@@ -291,7 +283,7 @@ switchPlayer('w','b').
 
 %End of the game
 %%When it is no longer possible for either player to move, the game is over.
-%%The discs are now counted and the player with the majority of his or her color 
+%%The discs are now counted and the player with the majority of his or her color
 %%discs on the board is the winner.
 %%A tie is possible.
 gameover(Winner) :- board(Board), \+ canMakeAMove(Board,'w'), \+ canMakeAMove(Board,'b'), findWinner(Board,Winner, B, W), format('~w black disks against ~w white disks.~n',[B,W]).
@@ -301,7 +293,7 @@ gameoverWithResult(Board, Winner, Nb) :- \+ canMakeAMove(Board,'w'), \+ canMakeA
 
 %Find the winner
 findWinner(Board, Winner, B, W):- countDisk(Board,0,0,B,W), selectWinner(B,W,Winner).
-	
+
 %Count the number of disk for each player B and W
 countDisk([],B,W,FinalB,FinalW) :- FinalB is B, FinalW is W.
 countDisk(['b'|T],B,W,FinalB,FinalW) :- X is B+1, countDisk(T,X,W,FinalB,FinalW), !.
@@ -397,7 +389,7 @@ IndexMaxFinal is IndexMax.
 
 % finds if they are different indexes with the same number of coins that can be flipped
 
-countOccurencesMax(Board, Index, Player, ListIndex, ListIndexFinal, FinalCoinsMax) :- Index >= 64, print(ListIndex).
+countOccurencesMax(Board, Index, Player, ListIndex, ListIndexFinal, FinalCoinsMax) :- Index >= 64, ListIndexFinal is ListIndex.
 countOccurencesMax(Board, Index, Player, ListIndex, ListIndexFinal, FinalCoinsMax) :-Index < 64,
 countAllCoinSandwich(Board, Index, Player,  0, FinalCoins),
 FinalCoinsMax = FinalCoins,

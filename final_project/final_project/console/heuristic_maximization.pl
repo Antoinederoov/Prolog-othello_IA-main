@@ -1,20 +1,14 @@
-% MAXIMIZATION HEURISTICS
-
-:- writeln('Maximisation Heuristic has loaded.').
-
 %Board est le plateau actuel
-% P1 is the current player while P2 is the ennemy
-% Maximisation
-% P1 is the current player
+    % P1 is the current player while P2 is the ennemy
 
-heuristic_maximisation(Board, P1, P2, H) :-
-	%compter le nombre de jetons pour P1 puis
-    %compter le nombre de jetons pour P2
-    countDiskPerPlayer(Board,P1,0,NbDiskP1),
-    countDiskPerPlayer(Board,P2,0,NbDiskP2),
-    Somme is NbDiskP1 + NbDiskP2,
-    %Calculer l heuristique
-    heuristic_coin_parity_compute(NbDiskP1, NbDiskP2, Somme, H).
 
-heuristic_coin_parity_compute(_,_,0,H):- H is 0.
-heuristic_coin_parity_compute(NbDiskP1,NbDiskP2,Somme,H):- H is 100 * (NbDiskP1-NbDiskP2) / Somme.
+	heuristic_maximisation(Board, P1, P2, H) :-
+	% on trouve le max de coins qui peuvent être retournés pour chaque joueur
+	countMaxCoinSandwich(Board,0,_,IndexMaxFinalP1,P1,0,FinalCoinsMaxP1),
+	countMaxCoinSandwich(Board,0,_,IndexMaxFinalP2,P2,0,FinalCoinsMaxP2),
+	Somme is FinalCoinsMaxP1 + FinalCoinsMaxP2,
+		% calculer lheuristique
+	heuristic_maximization(FinalCoinsMaxP1,FinalCoinsMaxP2,Somme,H).
+
+		heuristic_maximization(_,_,0,H):- H is 0.
+heuristic_maximization(NbDiskP1,NbDiskP2,Somme,H):- H is 100 * (NbDiskP1-NbDiskP2) / Somme.

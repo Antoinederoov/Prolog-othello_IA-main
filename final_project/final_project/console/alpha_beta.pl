@@ -11,6 +11,7 @@ heuristic(4, Board, Value, P1, P2) :- heuristic_actual_mobility(Board, P1, P2, V
 heuristic(5, Board, Value, P1, P2) :- heuristic_coin_parity(Board, P1, P2, Value).
 heuristic(6, Board, Value, P1, P2) :- heuristic_cornersCaptured(Board, P1, P2, Value).
 heuristic(7, Board, Value, P1, P2) :- heuristic_potential_mobility(Board, P1, P2, Value).
+	heuristic(8, Board, Value, P1, P2) :- heuristic_maximization(Board, P1, P2, Value).
 
 %Launch the alpha-beta algorithm and return the best move that has been found
 alpha_beta(Pos, Move, Depth, Player) :- alpha_beta_vertical(Depth, Pos,Player, _, Move, -1000000000, 1000000000).
