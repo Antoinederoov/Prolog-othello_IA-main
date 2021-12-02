@@ -1,4 +1,5 @@
 
+:-writeln('Maximization heuristic has loaded').
 heuristic_maximization(Board, P1, P2, H) :-
 	% on trouve le max de coins qui peuvent être retournés pour chaque joueur
 	countMaxCoinSandwich(Board,0,_,IndexMaxFinalP1,P1,0,FinalCoinsMaxP1),

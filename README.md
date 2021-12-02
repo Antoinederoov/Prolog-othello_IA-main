@@ -1,4 +1,6 @@
-# Prolog-Othello_IA
-A prolog implementation of Othello with IA
-
-To test our final application, download final_project.zip and follow the instructions.
+lena - coin parity et max
+maya - corners capteurs et potential mobility
+maya - alpha beta
+maria - stability
+gustavo - mobility
+thomas - graphes

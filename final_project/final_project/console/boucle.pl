@@ -33,6 +33,9 @@
 	:- [heuristic_stability].
 	:- [heuristic_cornersCaptured].
 	:- [heuristic_maximization].
+    
+decroissant(0).
+decroissant(N) :- init(), N>0, nl, N1 is N-1, decroissant(N1).
 
 	init :-
 	retractall(board(_)),
@@ -46,70 +49,27 @@
 	nth0(35,Board,'b'),
 	nth0(36,Board,'w'),
 	assertz(board(Board)),
-	writeln('Initialisation du board OK'),
 	repeat,
 	writeln(' ----- '),
 	writeln('Le joueur noir (b) est : '),
 	writeln('1) Humain'),
 	writeln('2) IA'),
 	writeln(' ----- '),
-	read(PB),
-	PB > 0,
-	PB < 3,
-	assertz(playerType(b, PB)),
-	(
-		PB == 2 ->
-			(
-				repeat,
-				writeln(' ----- '),
-				writeln('Choisissez l\'heuristique pour le joueur noir (b)'),
-				chooseHeuristic(b, HB),
-				(
-					HB > 1 ->
-						(
-							repeat,
-							writeln('Choisissez la profondeur pour le joueur noir (b)'),
-							read(DB),
-							DB>0,
-							assertz(depthPlayer(b, DB))
-						) ;
-true
-	)
-	) ;
-true
-	),
-repeat,
+	assertz(playerType(b, 2)),
+    assertz(heuristicPlayer(b, 5)),
+    assertz(depthPlayer(b, 3)),
+
+	
 	writeln(' ----- '),
 	writeln('Le joueur blanc (w) est : '),
 	writeln('1) Humain'),
 	writeln('2) IA'),
 	writeln(' ----- '),
-	read(PW),
-	PW > 0,
-	PW < 3,
-	assertz(playerType(w, PW)),
-	(
-		PW == 2 ->
-			(
-				repeat,
-				writeln(' ----- '),
-				writeln('Choisissez l\'heuristique pour le joueur blanc (w)'),
-				chooseHeuristic(w, HW),
-				(
-					HW > 1 ->
-						(
-							repeat,
-							writeln('Choisissez la profondeur pour le joueur blanc (w)'),
-							read(DW),
-							DW>0,
-							assertz(depthPlayer(w, DW))
-						) ;
-true
-	)
-	) ;
-true
-	),
-displayBoard,
+	assertz(playerType(w, 2)),
+    assertz(heuristicPlayer(w, 6)),
+	%assertz(depthPlayer(w, 3))
+
+%displayBoard,
 	play('b').
 
 		%Choose the heuristic for the given player
@@ -133,8 +93,8 @@ displayBoard,
 %%If you cant outflank and flip at least one opposing disc, you must pass
 	%%your turn. However, if a move is available to you, you cant forfeit your turn.
 	%%if a player cannot make a valide move, he pass his turn and the opponent continues
-	play(_) :- gameover(Winner), !, format('Game is over, the winner is ~w ~n',[Winner]), displayBoard.
-play(Player) :- board(Board), canMakeAMove(Board,Player), format('New turn for : ~w ~n',[Player]), displayBoard, playerType(Player, Type),
+	play(_) :- gameover(Winner), !, format('Game is over, the winner is ~w ~n',[Winner]).
+play(Player) :- board(Board), canMakeAMove(Board,Player), playerType(Player, Type),
 				(Type == 2 -> ia(Board,Player,Move) ; human(Board,Player,Move)), playMove(Board,Move,Player,NewBoard), applyIt(Board,NewBoard), switchPlayer(Player,NextPlayer), play(NextPlayer).
 play(Player) :- format('Player "~w" can not play.~n',[Player]), switchPlayer(Player,NextPlayer), play(NextPlayer).
 
@@ -246,7 +206,10 @@ ia(Board, Player, Move) :-
 		H == 1 ->
 		(
 			%Random IA
-			heuristic_random(Board,Player,Move)
+			allValidMoves(Board, Player, List),
+			length(List, Length),
+			random(0, Length, Index),
+			nth0(Index, List, Move)
 		);
 		(
 			depthPlayer(Player, D),
@@ -258,8 +221,7 @@ ia(Board, Player, Move) :-
 			retract(playerini(-1, Opponent)),
 			retract(playerini(1, Player))
 		)
-	),
-	format('IA plays move number ~w ~n', [Move]).
+	).
 
 %Ask for the move of the human player
 human(Board,Player,Move) :-
@@ -376,7 +338,7 @@ IndexMaxActuelle is Index,
 IndexActuelle is Index + 1,
 countMaxCoinSandwich(Board, IndexActuelle, IndexMaxActuelle, IndexMaxFinal, Player, CurrentCoinsLocalMax, FinalCoinsMax).
 
-countMaxCoinSandwich(Board, Index, _, IndexMaxFinal, Player, CurrentCoinsMax, FinalCoinsMax) :- Index < 64,
+countMaxCoinSandwich(Board, Index, IndexMax, IndexMaxFinal, Player, CurrentCoinsMax, FinalCoinsMax) :- Index < 64,
 countAllCoinSandwich(Board, Index, Player,  0, FinalCoins),
 CurrentCoinsMax >= FinalCoins,
 IndexMaxActuelle is Index,
@@ -386,3 +348,23 @@ countMaxCoinSandwich(Board, IndexActuelle, IndexMaxActuelle, IndexMaxFinal, Play
 countMaxCoinSandwich(_, Index, IndexMax, IndexMaxFinal, _, CurrentCoinsMax, FinalCoinsMax) :- Index >= 64,
 FinalCoinsMax is CurrentCoinsMax,
 IndexMaxFinal is IndexMax.
+
+% finds if they are different indexes with the same number of coins that can be flipped
+
+countOccurencesMax(Board, Index, Player, ListIndex, ListIndexFinal, FinalCoinsMax) :- Index >= 64, ListIndexFinal is ListIndex.
+countOccurencesMax(Board, Index, Player, ListIndex, ListIndexFinal, FinalCoinsMax) :-Index < 64,
+countAllCoinSandwich(Board, Index, Player,  0, FinalCoins),
+FinalCoinsMax = FinalCoins,
+add(Index, ListIndex, ListIndexActuelle),
+IndexActuelle is Index + 1,
+countOccurencesMax(Board, IndexActuelle, Player, ListIndexActuelle, ListIndexFinal, FinalCoinsMax).
+
+countOccurencesMax(Board, Index, Player, ListIndex, ListIndexFinal, FinalCoinsMax) :- Index < 64,
+countAllCoinSandwich(Board, Index, Player,  0, FinalCoins),
+FinalCoinsMax \= FinalCoins,
+IndexActuelle is Index + 1,
+countOccurencesMax(Board, IndexActuelle, Player, ListIndex, ListIndexFinal, FinalCoinsMax).
+
+
+add(X,[],[X]).
+add(X,[Y|Tail],[Y|Tail1]):- add(X,Tail,Tail1).
