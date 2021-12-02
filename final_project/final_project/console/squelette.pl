@@ -12,6 +12,7 @@
 	%%Black always moves first.
 	:- writeln('Bienvenue sur Prolog_Othello-IA !').
 	:- dynamic(board/1).
+	:- dynamic (ia/3).
 	:- dynamic(playerini/2).
 	:- dynamic(heuristicPlayer/2).
 	:- dynamic(depthPlayer/2).
@@ -24,6 +25,7 @@
 	:- writeln('Chargement de alpha beta : ').
 	:- [alpha_beta].
 	:- writeln('Chargement des Heuristics : ').
+	:- [heuristic_random].
 	:- [heuristic_disk_diff].
 	:- [heuristic_coin_parity].
 	:- [heuristic_actual_mobility].
@@ -244,10 +246,7 @@ ia(Board, Player, Move) :-
 		H == 1 ->
 		(
 			%Random IA
-			allValidMoves(Board, Player, List),
-			length(List, Length),
-			random(0, Length, Index),
-			nth0(Index, List, Move)
+			heuristic_random(Board,Payer,Move)
 		);
 		(
 			depthPlayer(Player, D),
