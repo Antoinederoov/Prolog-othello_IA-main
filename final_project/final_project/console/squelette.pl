@@ -380,8 +380,9 @@ countMaxCoinSandwich(Board, IndexActuelle, IndexMaxActuelle, IndexMaxFinal, Play
 countMaxCoinSandwich(Board, Index, IndexMax, IndexMaxFinal, Player, CurrentCoinsMax, FinalCoinsMax) :- Index < 64,
 countAllCoinSandwich(Board, Index, Player,  0, FinalCoins),
 CurrentCoinsMax >= FinalCoins,
+IndexMaxActuelle is Index,
 IndexActuelle is Index + 1,
-countMaxCoinSandwich(Board, IndexActuelle, IndexMax, IndexMaxFinal, Player, CurrentCoinsMax, FinalCoinsMax).
+countMaxCoinSandwich(Board, IndexActuelle, IndexMaxActuelle, IndexMaxFinal, Player, CurrentCoinsMax, FinalCoinsMax).
 
 countMaxCoinSandwich(_, Index, IndexMax, IndexMaxFinal, _, CurrentCoinsMax, FinalCoinsMax) :- Index >= 64,
 FinalCoinsMax is CurrentCoinsMax,
