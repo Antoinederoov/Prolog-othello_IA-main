@@ -24,7 +24,6 @@
 	:- writeln('Chargement de alpha beta : ').
 	:- [alpha_beta].
 	:- writeln('Chargement des Heuristics : ').
-	:- [heuristic_random].
 	:- [heuristic_disk_diff].
 	:- [heuristic_coin_parity].
 	:- [heuristic_actual_mobility].
@@ -245,7 +244,10 @@ ia(Board, Player, Move) :-
 		H == 1 ->
 		(
 			%Random IA
-			 heuristic_random(Board, Player, H)
+			allValidMoves(Board, Player, List),
+			length(List, Length),
+			random(0, Length, Index),
+			nth0(Index, List, Move)
 		);
 		(
 			depthPlayer(Player, D),
