@@ -26,7 +26,7 @@
 	:- [alpha_beta].
 	:- writeln('Chargement des Heuristics : ').
 	:- [heuristic_random].
-	:- [heuristic_disk_diff].
+	:- [heuristic_mix].
 	:- [heuristic_coin_parity].
 	:- [heuristic_actual_mobility].
 	:- [heuristic_potential_mobility].

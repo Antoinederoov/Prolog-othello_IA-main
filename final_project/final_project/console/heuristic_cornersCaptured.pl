@@ -28,8 +28,6 @@
             %Compter le score de chaque joueur en prenant en compte les coins effectifs, potentiels et improbables
                 ScoreP1 is 5*NbDiskP1+3*NbPotentialFinal1,
                     ScoreP2 is 5*NbDiskP2+3*NbPotentialFinal2,
-                        write(ScoreP1),
-                        write(ScoreP2),
 
                         %Somme des scores
     Somme is ScoreP1 + ScoreP2,

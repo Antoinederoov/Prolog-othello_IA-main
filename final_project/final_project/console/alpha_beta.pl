@@ -5,7 +5,7 @@
 :- writeln('Alpha beta has loaded.').
 
 %Select the chosen heuristic
-heuristic(2, Board, Value, _, _) :- heuristic_disk_diff(Board, Value).
+heuristic(2, Board, Value, P1, P2) :- heuristic_mix(Board, P1, P2, Value).
 heuristic(3, Board, Value, P1, P2) :- heuristic_stability(Board, P1, P2, Value).
 heuristic(4, Board, Value, P1, P2) :- heuristic_actual_mobility(Board, P1, P2, Value).
 heuristic(5, Board, Value, P1, P2) :- heuristic_coin_parity(Board, P1, P2, Value).
